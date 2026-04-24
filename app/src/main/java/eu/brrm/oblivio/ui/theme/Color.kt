@@ -26,5 +26,6 @@ val BrandIvory = Color(0xFFF3EEE6)
 val BrandCharcoal = Color(0xFF070A13)
 val BrandMint = Color(0xFFDAF7F3)
 val BrandRedShadow = Color(0xFF6A171D)
-/** Opaque brown at the arc junction for the “O” mark on dark theme backgrounds (reference ~#A87C58). */
-val OblivioLogoMarkDark = Color(0xFFA87C58)
+/** O fill gradient from official vector (`paint0_linear_919_4947`: `x1=21.7456, y1=299.389` → `x2=115.075, y2=283.107` in 134×134 artboard, `userSpaceOnUse`). */
+val OblivioLogoMarkGradientFrom = Color(0xFF944C16)
+val OblivioLogoMarkGradientTo = Color.White

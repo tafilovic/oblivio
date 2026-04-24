@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,6 +49,7 @@ import eu.brrm.oblivio.ui.components.OblivioDialogConfirmStyle
 import eu.brrm.oblivio.ui.components.OblivioYesNoDialog
 import eu.brrm.oblivio.ui.theme.BrandBronze
 import eu.brrm.oblivio.ui.theme.BrandIvory
+import eu.brrm.oblivio.ui.theme.LocalOblivioInDarkTheme
 import eu.brrm.oblivio.ui.theme.OblivioProfileTitleTextStyle
 import eu.brrm.oblivio.ui.theme.OblivioTheme
 import androidx.compose.material3.ButtonDefaults
@@ -85,11 +85,11 @@ fun ProfileScreen(
     }
 
     val scroll = rememberScrollState()
-    val isSystemDark = isSystemInDarkTheme()
+    val isAppInDark = LocalOblivioInDarkTheme.current
     val lightRowSelected = state.appTheme == AppThemeMode.Light ||
-        (state.appTheme == AppThemeMode.System && !isSystemDark)
+        (state.appTheme == AppThemeMode.System && !isAppInDark)
     val darkRowSelected = state.appTheme == AppThemeMode.Dark ||
-        (state.appTheme == AppThemeMode.System && isSystemDark)
+        (state.appTheme == AppThemeMode.System && isAppInDark)
     val outline = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
     val onBg = MaterialTheme.colorScheme.onBackground
     val hint = onBg.copy(alpha = 0.6f)
@@ -240,10 +240,16 @@ private fun ConcentricFrameAvatar(
     size: Dp,
     borderColor: Color,
 ) {
+    val isAppInDark = LocalOblivioInDarkTheme.current
     val corner = 14.dp
     val step = 3.dp
     val stroke = 1.dp
     val onIcon = MaterialTheme.colorScheme.onBackground
+    val innerFill = if (isAppInDark) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        BrandIvory.copy(alpha = 0.1f)
+    }
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(size),
@@ -274,7 +280,7 @@ private fun ConcentricFrameAvatar(
                             .fillMaxSize()
                             .clip(RoundedCornerShape(8.dp))
                             .border(stroke, borderColor, RoundedCornerShape(8.dp))
-                            .background(BrandIvory.copy(alpha = 0.1f))
+                            .background(innerFill)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center,
                     ) {

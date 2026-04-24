@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.Oblivio" parent="android:Theme.Material.NoActionBar" >
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
     <!-- Night: same splash structure, dark background so cold start does not flash white. -->
     <style name="Theme.Oblivio.Starting" parent="Theme.SplashScreen">

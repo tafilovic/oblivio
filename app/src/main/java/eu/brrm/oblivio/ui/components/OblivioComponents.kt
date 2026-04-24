@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,10 +42,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.isFinite
 import androidx.compose.ui.unit.sp
-import kotlin.math.cos
 import kotlin.math.min
-import kotlin.math.sin
-import kotlin.math.PI
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.brrm.oblivio.ui.theme.BrandBronze
@@ -57,8 +53,10 @@ import eu.brrm.oblivio.ui.theme.BrandMint
 import eu.brrm.oblivio.ui.theme.BrandRedShadow
 import eu.brrm.oblivio.ui.theme.DarkBackground
 import eu.brrm.oblivio.ui.theme.DarkHint
-import eu.brrm.oblivio.ui.theme.OblivioLogoMarkDark
+import eu.brrm.oblivio.ui.theme.OblivioLogoMarkGradientFrom
+import eu.brrm.oblivio.ui.theme.OblivioLogoMarkGradientTo
 import eu.brrm.oblivio.ui.theme.LightHint
+import eu.brrm.oblivio.ui.theme.LocalOblivioInDarkTheme
 import eu.brrm.oblivio.ui.theme.OblivioLogoWordmarkBaseStyle
 
 /**
@@ -74,7 +72,7 @@ private object OblivioLogoProportions {
 
 @Composable
 fun OblivioBackground(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    val isDark = isSystemInDarkTheme()
+    val isAppDark = LocalOblivioInDarkTheme.current
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -86,7 +84,7 @@ fun OblivioBackground(modifier: Modifier = Modifier, content: @Composable BoxSco
                 .size(320.dp),
         ) {
             drawArc(
-                color = BrandMint.copy(alpha = if (isDark) 0.18f else 0.36f),
+                color = BrandMint.copy(alpha = if (isAppDark) 0.18f else 0.36f),
                 startAngle = 220f,
                 sweepAngle = 290f,
                 useCenter = false,
@@ -119,7 +117,7 @@ fun OblivioLogo(
 ) {
     val scale = markScale.coerceIn(0.25f, 2f)
     val markSize = OblivioLogoProportions.MarkSize * scale
-    val isAppDark = MaterialTheme.colorScheme.background == DarkBackground
+    val isAppDark = LocalOblivioInDarkTheme.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -140,75 +138,41 @@ fun OblivioLogo(
             )
             val innerSize = Size(innerW, innerH)
             // Two 180° semicircles, junctions on the \ diagonal (135° and 315°; 0° = 3 o’clock).
-            val markGradientLight = Brush.linearGradient(
-                listOf(BrandCharcoal, BrandRedShadow, BrandCopper, BrandBronze, BrandIvory),
-                start = Offset(size.width, 0f),
-                end = Offset(0f, size.height),
-            )
-            if (isAppDark) {
-                // Peak opacity at the bottom-left junction (~135°), fading to transparent at each free end.
-                val cx = size.width * 0.5f
-                val cy = size.height * 0.5f
-                val rOuter = size.minDimension * 0.5f
-                val rInner = (size.minDimension - 2f * stroke) * 0.5f
-                fun p(deg: Float, r: Float): Offset {
-                    val rad = deg * (PI / 180.0)
-                    return Offset(
-                        cx + (r * cos(rad)).toFloat(),
-                        cy + (r * sin(rad)).toFloat(),
-                    )
-                }
-                val transparent = Color.Transparent
-                // Outer: 315° → 135° (CW); full color at 135.
-                val outerDark = Brush.linearGradient(
-                    listOf(transparent, OblivioLogoMarkDark),
-                    start = p(315f, rOuter),
-                    end = p(135f, rOuter),
-                )
-                // Inner: 135° → 315° (CW); full color at 135.
-                val innerDark = Brush.linearGradient(
-                    listOf(OblivioLogoMarkDark, transparent),
-                    start = p(135f, rInner),
-                    end = p(315f, rInner),
-                )
-                drawArc(
-                    brush = outerDark,
-                    startAngle = 315f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = Offset.Zero,
-                    size = full,
-                    style = Stroke(width = stroke, cap = StrokeCap.Butt),
-                )
-                drawArc(
-                    brush = innerDark,
-                    startAngle = 135f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = innerTopLeft,
-                    size = innerSize,
-                    style = Stroke(width = stroke, cap = StrokeCap.Butt),
+            val markGradient = if (isAppDark) {
+                // Vector `paint0_linear_919_4947` (134×134 artboard, userSpaceOnUse).
+                val artboard = 134f
+                val sx = size.width / artboard
+                val sy = size.height / artboard
+                Brush.linearGradient(
+                    listOf(OblivioLogoMarkGradientFrom, OblivioLogoMarkGradientTo),
+                    start = Offset(21.7456f * sx, 299.389f * sy),
+                    end = Offset(115.075f * sx, 283.107f * sy),
                 )
             } else {
-                drawArc(
-                    brush = markGradientLight,
-                    startAngle = 315f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = Offset.Zero,
-                    size = full,
-                    style = Stroke(width = stroke, cap = StrokeCap.Butt),
-                )
-                drawArc(
-                    brush = markGradientLight,
-                    startAngle = 135f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = innerTopLeft,
-                    size = innerSize,
-                    style = Stroke(width = stroke, cap = StrokeCap.Butt),
+                Brush.linearGradient(
+                    listOf(BrandCharcoal, BrandRedShadow, BrandCopper, BrandBronze, BrandIvory),
+                    start = Offset(size.width, 0f),
+                    end = Offset(0f, size.height),
                 )
             }
+            drawArc(
+                brush = markGradient,
+                startAngle = 315f,
+                sweepAngle = 180f,
+                useCenter = false,
+                topLeft = Offset.Zero,
+                size = full,
+                style = Stroke(width = stroke, cap = StrokeCap.Butt),
+            )
+            drawArc(
+                brush = markGradient,
+                startAngle = 135f,
+                sweepAngle = 180f,
+                useCenter = false,
+                topLeft = innerTopLeft,
+                size = innerSize,
+                style = Stroke(width = stroke, cap = StrokeCap.Butt),
+            )
         }
         if (includeWordmark) {
             val iconToText = markSize * OblivioLogoProportions.IconToTextGapToHeight
@@ -344,8 +308,8 @@ fun OblivioPrimaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
-    val containerBrush = if (dark) {
+    val isAppDark = LocalOblivioInDarkTheme.current
+    val containerBrush = if (isAppDark) {
         Brush.horizontalGradient(listOf(BrandBronze, BrandIvory))
     } else {
         Brush.horizontalGradient(listOf(BrandCopper, BrandCharcoal))
@@ -362,7 +326,7 @@ fun OblivioPrimaryButton(
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = if (dark) DarkBackground else Color.White,
+                contentColor = if (isAppDark) DarkBackground else Color.White,
             ),
         ) {
             Text(text = text, style = MaterialTheme.typography.labelLarge)
@@ -399,7 +363,7 @@ fun OblivioTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
-    val dark = isSystemInDarkTheme()
+    val isAppDark = LocalOblivioInDarkTheme.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -410,7 +374,7 @@ fun OblivioTextField(
         placeholder = {
             Text(
                 text = label,
-                color = if (dark) DarkHint else LightHint,
+                color = if (isAppDark) DarkHint else LightHint,
                 style = MaterialTheme.typography.bodyLarge,
             )
         },
@@ -418,7 +382,7 @@ fun OblivioTextField(
         visualTransformation = visualTransformation,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-            focusedBorderColor = if (dark) BrandBronze else BrandCopper,
+            focusedBorderColor = if (isAppDark) BrandBronze else BrandCopper,
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedContainerColor = Color.Transparent,

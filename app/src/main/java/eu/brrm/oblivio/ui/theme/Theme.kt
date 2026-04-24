@@ -5,6 +5,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+
+/**
+ * True when [OblivioTheme] is in dark mode (in-app / user setting).
+ * Use this instead of comparing `MaterialTheme.colorScheme.background` to a fixed token, or
+ * [androidx.compose.foundation.isSystemInDarkTheme] when the UI must follow the app, not the device.
+ */
+val LocalOblivioInDarkTheme = compositionLocalOf { false }
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkButtonSolid,
@@ -37,9 +46,13 @@ fun OblivioTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = OblivioTypography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalOblivioInDarkTheme provides darkTheme,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = OblivioTypography,
+            content = content
+        )
+    }
 }

@@ -7,6 +7,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,11 +77,16 @@ fun SignInScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Spacer(modifier = Modifier.height(40.dp))
-                        OblivioLogo(
-                            wordmarkText = stringResource(id = R.string.app_wordmark),
-                            modifier = Modifier.fillMaxWidth(0.7f),
-                            markScale = 0.7f,
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            OblivioLogo(
+                                wordmarkText = stringResource(id = R.string.app_wordmark),
+                                modifier = Modifier.fillMaxWidth(0.7f),
+                                markScale = 0.7f,
+                            )
+                        }
                         Spacer(modifier = Modifier.height(48.dp))
                     }
                 }
