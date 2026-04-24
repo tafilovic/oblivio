@@ -1,0 +1,41 @@
+---
+description: Jetpack Compose UI, feedback, and screen structure
+globs:
+  - app/src/main/java/eu/brrm/gastrobot/ui/**/*.kt
+  - app/src/main/java/eu/brrm/oblivio/ui/**/*.kt
+alwaysApply: false
+---
+
+# Compose UI layer
+
+## Composables
+
+- Prefer stateless composables; hoist state to the ViewModel or a parent composable.
+- Put `Modifier` as the first optional parameter.
+- Avoid side effects in the composable body; use `LaunchedEffect`, `DisposableEffect`, or `SideEffect` explicitly.
+- Avoid deep nesting; extract smaller composables.
+
+## Separation of concerns
+
+- No business logic in composables.
+- No repository calls from composables.
+- No navigation logic inside reusable UI components (wire navigation in Route/host-level composables via callbacks or dedicated navigation APIs).
+
+## User feedback
+
+- Always give feedback after user actions (success, error, or empty state as appropriate).
+- For work that can take noticeable time, show a waiting or loading state.
+- On errors, show a clear message and offer retry when it makes sense.
+
+## Screens with a ViewModel
+
+- Split into `*Route` (wiring, navigation, `ViewModel` acquisition) and `*Screen` (presentation and callbacks).
+
+## Previews
+
+- Add `@Preview` for main screens and reusable custom composables.
+- For **Oblivio** (`eu.brrm.oblivio`), follow [oblivio-compose-ui.mdc](oblivio-compose-ui.mdc): previews for all UI components and screens (light + dark), wrapped in `OblivioTheme` where applicable.
+
+## Coroutines in UI
+
+- Collect flows with `collectAsStateWithLifecycle`.

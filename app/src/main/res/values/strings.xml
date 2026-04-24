@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name" translatable="false">Oblivio</string>
+    <string name="app_wordmark" translatable="false">BLIVIO</string>
+    <string name="footer_copyright" translatable="false">© 2026 Oblivio App</string>
+
+    <string name="sign_in_title">Sign in</string>
+    <string name="sign_in_username_label">Username or Email</string>
+    <string name="sign_in_password_label">Password</string>
+    <string name="sign_in_action">Sign in</string>
+    <string name="sign_in_register_action">Create account</string>
+    <string name="sign_in_toggle_password_content_desc">Toggle password visibility</string>
+
+    <string name="register_title">Register</string>
+    <string name="register_username_label">Username</string>
+    <string name="register_email_label">Email (optional)</string>
+    <string name="register_password_label">Password</string>
+    <string name="register_confirm_password_label">Confirm password</string>
+    <string name="register_action">Create account</string>
+    <string name="register_toggle_password_content_desc">Toggle password visibility</string>
+    <string name="register_toggle_confirm_password_content_desc">Toggle confirm password visibility</string>
+
+    <string name="notifications_title">Push notifications</string>
+    <string name="notifications_body">Enable push notifications to get real-time updates on messages, emails, and calls.</string>
+    <string name="notifications_enable_action">Enable</string>
+    <string name="notifications_maybe_later_action">Maybe later</string>
+
+    <string name="error_signin_failed">Please enter valid credentials.</string>
+    <string name="error_register_failed">Registration could not be completed. Please try again.</string>
+    <string name="error_network">Couldn\'t reach the server. Check your connection and try again.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="error_home_load_failed">Could not load the home screen. Try again later.</string>
+
+    <string name="home_section_notifications_title">Notifications</string>
+    <string name="home_welcome_title">Welcome!</string>
+    <string name="home_welcome_body">Never miss an update — receive real-time notifications for incoming Oblivio messages, emails, and calls.</string>
+    <string name="home_nav_notifications">Notifications</string>
+    <string name="home_nav_profile">Profile</string>
+    <string name="home_section_profile_title">Profile</string>
+    <string name="home_profile_placeholder">Your profile and settings will appear here.</string>
+
+    <string name="profile_title">My profile</string>
+    <string name="profile_avatar_content_desc">Profile picture</string>
+    <string name="profile_push_section">Push notifications:</string>
+    <string name="profile_push_chat">Chat Notifications</string>
+    <string name="profile_push_email">Email Notifications</string>
+    <string name="profile_push_call">Call Notifications</string>
+    <string name="profile_theme_section">Theme:</string>
+    <string name="profile_theme_light">Light</string>
+    <string name="profile_theme_dark">Dark</string>
+    <string name="profile_account_section">Account:</string>
+    <string name="profile_logout">Log out</string>
+    <string name="profile_logout_content_desc">Log out of your account</string>
+    <string name="profile_logout_dialog_title">Log out?</string>
+    <string name="profile_logout_dialog_message">You will need to sign in again to use your account. Do you want to log out now?</string>
+    <string name="profile_logout_dialog_confirm">Log out</string>
+    <string name="profile_logout_dialog_cancel">Stay signed in</string>
+    <string name="error_profile_load">Could not load profile. Pull to refresh or try again later.</string>
+</resources>

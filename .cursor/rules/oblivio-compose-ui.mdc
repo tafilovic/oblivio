@@ -1,0 +1,30 @@
+---
+description: Oblivio Jetpack Compose previews and UI file conventions
+globs:
+  - app/src/main/java/eu/brrm/oblivio/ui/**/*.kt
+alwaysApply: false
+---
+
+# Oblivio Compose UI and previews
+
+## When this applies
+
+- All composable UI under `eu.brrm.oblivio.ui` (components, feature screens, theme).
+
+## Previews (required)
+
+- Add at least one `@Preview` for **every** public or internal composable that **draws UI** (layouts, design-system widgets, and `*Screen` content).
+- Prefer **light and dark** coverage:
+  - Light: default preview or `OblivioTheme(darkTheme = false) { … }`
+  - Dark: `@Preview(…, uiMode = Configuration.UI_MODE_NIGHT_YES)` and/or `OblivioTheme(darkTheme = true) { … }`
+- Wrap previews in `OblivioTheme { … }` so colors and typography match the app.
+- Do **not** use hardcoded user-visible copy in previews; use `stringResource` for text that mirrors production.
+
+## Exemptions
+
+- `*ViewModel.kt`, Hilt `*Module.kt`, and pure navigation wiring without its own layout do not need visual previews.
+- `*Route.kt` composables that only forward to `*Screen` and collect ViewModel state may omit a dedicated preview if the corresponding `*Screen` is already fully previewed.
+
+## New reusable components
+
+- Add previews in the same file as the component or in a sibling `*Previews.kt` in the same package (see `OblivioComponentsPreviews.kt`).

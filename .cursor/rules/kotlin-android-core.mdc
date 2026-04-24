@@ -1,0 +1,31 @@
+---
+description: Kotlin style, layering, and Cursor behavior for the whole project
+alwaysApply: true
+---
+
+# Kotlin and project core
+
+## Language and style
+
+- Use Kotlin only.
+- Prefer immutable data (`val`, immutable models).
+- Keep functions small and single-purpose; use explicit names (avoid abbreviations).
+- Avoid duplication; prefer reusable components when the same UI or logic repeats.
+
+## User-visible text
+
+- Use string resources, not literals in code; when you add or change default strings, update every shipped locale under `res/values*` (details in the string-resources rule when editing those files).
+
+## Architecture (all layers)
+
+- MVVM with unidirectional flow: UI → ViewModel → UseCase (when present) → Repository.
+- Domain logic must not depend on the Android framework.
+- The UI layer must not access repositories directly.
+
+## Working in this codebase
+
+- Preserve existing architecture unless the user asks to change it.
+- Prefer refactoring over rewriting.
+- Do not add new libraries without a clear justification.
+- Follow existing naming, module layout, and patterns in nearby code.
+- Do not run Gradle builds (`./gradlew`, `gradlew.bat`, assemble, compile tasks, etc.) after edits unless the user explicitly asks to build or verify the build.

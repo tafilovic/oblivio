@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Oblivio" parent="android:Theme.Material.Light.NoActionBar" >
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- System splash before Compose (light / not night): avoids white flash by matching light background. -->
+    <style name="Theme.Oblivio.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Oblivio</item>
+    </style>
+</resources>

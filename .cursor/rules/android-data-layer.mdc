@@ -1,0 +1,19 @@
+---
+description: Networking and repository mapping conventions
+globs:
+  - app/src/main/java/eu/brrm/gastrobot/network/**/*.kt
+  - app/src/main/java/eu/brrm/gastrobot/repository/**/*.kt
+alwaysApply: false
+---
+
+# Data layer
+
+## Networking
+
+- Use Retrofit with OkHttp as in the existing stack.
+
+## Models and errors
+
+- Map DTOs to domain (or UI-ready domain) models before they leave the data layer.
+- Never expose raw DTOs to the UI.
+- Handle errors explicitly (sealed result types, `Result`, or the project’s established pattern).

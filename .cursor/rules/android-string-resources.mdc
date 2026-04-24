@@ -1,0 +1,13 @@
+---
+description: String resources, ellipsis, and multi-language values
+globs:
+  - app/src/main/res/values/**/*.xml
+  - app/src/main/res/values-*/**/*.xml
+alwaysApply: false
+---
+
+# String resources
+
+- Do not hardcode user-visible strings in Kotlin or XML when a string resource exists or should exist.
+- Use the ellipsis character `…` (or `&#8230;` in XML), not three ASCII periods.
+- When adding or changing a default-language string, add the same logical entry for every locale the app ships (`values`, `values-sr`, and any other `values-*` folders in this project).

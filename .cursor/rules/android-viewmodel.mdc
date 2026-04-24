@@ -1,0 +1,24 @@
+---
+description: ViewModel state, events, and coroutine rules
+globs: app/src/main/java/eu/brrm/gastrobot/**/*ViewModel.kt
+alwaysApply: false
+---
+
+# ViewModels
+
+## State and events
+
+- Represent screen state with a single `UiState` data class (or the project’s established sealed pattern if already in use).
+- Expose UI state with `StateFlow`; do not expose mutable state to the UI.
+- Model one-off actions (navigation, toasts, snackbars) with a sealed event stream (for example `Flow<UiEvent>` or `Channel`).
+
+## Android and Compose boundaries
+
+- Do not reference `Context` or Android UI classes.
+- Do not import Compose APIs.
+
+## Coroutines
+
+- Use `viewModelScope` for coroutine work; never use `GlobalScope`.
+- Prefer `Flow` over callbacks for asynchronous streams.
+- Inject or abstract dispatchers (do not hard-code `Dispatchers` in a way that hurts testing unless the project already does).
