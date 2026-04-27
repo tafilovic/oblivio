@@ -63,6 +63,7 @@ class SignInViewModel @Inject constructor(
             )
             if (result.isSuccess) {
                 _state.value = _state.value.copy(isSubmitting = false)
+                notificationRepository.subscribeCurrentDevice()
                 val postLogin = notificationRepository.resolvePostLoginDestination()
                 _effect.send(SignInEffect.NavigateAfterSignIn(destination = postLogin))
             } else {

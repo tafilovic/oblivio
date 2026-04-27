@@ -1,5 +1,6 @@
 package eu.brrm.oblivio.di
 
+import com.google.firebase.messaging.FirebaseMessaging
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -9,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import eu.brrm.oblivio.BuildConfig
 import eu.brrm.oblivio.data.remote.AuthApiService
 import eu.brrm.oblivio.data.remote.AuthRequestInterceptor
+import eu.brrm.oblivio.data.remote.NotificationApiService
 import javax.inject.Singleton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -65,5 +67,17 @@ object NetworkModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationApiService(retrofit: Retrofit): NotificationApiService {
+        return retrofit.create(NotificationApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseMessaging(): FirebaseMessaging {
+        return FirebaseMessaging.getInstance()
     }
 }

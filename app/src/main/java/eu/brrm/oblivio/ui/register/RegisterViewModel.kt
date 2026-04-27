@@ -86,6 +86,7 @@ class RegisterViewModel @Inject constructor(
             )
             if (result.isSuccess) {
                 _state.value = _state.value.copy(isSubmitting = false)
+                notificationRepository.subscribeCurrentDevice()
                 val postLogin = notificationRepository.resolvePostLoginDestination()
                 _effect.send(RegisterEffect.NavigateAfterRegister(destination = postLogin))
             } else {

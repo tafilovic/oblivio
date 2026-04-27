@@ -17,6 +17,6 @@ interface AuthApiService {
     @POST("users")
     suspend fun registerUser(@Body body: RequestBody): Response<ResponseBody>
 
-    @GET("auth/self")
+    @GET("users/me/")
     suspend fun getSelf(): Response<SelfUserDto>
 }

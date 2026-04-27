@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="eu.brrm.oblivio" />
+                  <option name="mobileSdkAppId" value="1:371808684407:android:a3544604412127b5fdb972" />
+                  <option name="projectId" value="oblivio-c6ab6" />
+                  <option name="projectNumber" value="371808684407" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
