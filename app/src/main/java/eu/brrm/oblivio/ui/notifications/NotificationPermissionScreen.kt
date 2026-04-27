@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,13 +24,14 @@ import androidx.compose.ui.unit.dp
 import eu.brrm.oblivio.R
 import eu.brrm.oblivio.ui.components.OblivioBackground
 import eu.brrm.oblivio.ui.components.OblivioPrimaryButton
-import eu.brrm.oblivio.ui.components.OblivioSecondaryButton
 import eu.brrm.oblivio.ui.theme.OblivioTheme
 
 @Composable
 fun NotificationPermissionScreen(
     onEnableClick: () -> Unit,
-    onMaybeLaterClick: () -> Unit,
+    showSettingsDialog: Boolean,
+    onSettingsDialogDismiss: () -> Unit,
+    onOpenSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     OblivioBackground(modifier = modifier.fillMaxSize()) {
@@ -64,12 +67,6 @@ fun NotificationPermissionScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onEnableClick,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                OblivioSecondaryButton(
-                    text = stringResource(id = R.string.notifications_maybe_later_action),
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onMaybeLaterClick,
-                )
             }
             Text(
                 text = stringResource(id = R.string.footer_copyright),
@@ -79,13 +76,40 @@ fun NotificationPermissionScreen(
             )
         }
     }
+
+    if (showSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = onSettingsDialogDismiss,
+            title = {
+                Text(text = stringResource(id = R.string.notifications_settings_dialog_title))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.notifications_settings_dialog_message))
+            },
+            confirmButton = {
+                TextButton(onClick = onOpenSettingsClick) {
+                    Text(text = stringResource(id = R.string.notifications_settings_dialog_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onSettingsDialogDismiss) {
+                    Text(text = stringResource(id = R.string.notifications_settings_dialog_cancel))
+                }
+            },
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun NotificationPermissionPreviewLight() {
     OblivioTheme {
-        NotificationPermissionScreen(onEnableClick = {}, onMaybeLaterClick = {})
+        NotificationPermissionScreen(
+            onEnableClick = {},
+            showSettingsDialog = false,
+            onSettingsDialogDismiss = {},
+            onOpenSettingsClick = {},
+        )
     }
 }
 
@@ -93,6 +117,11 @@ private fun NotificationPermissionPreviewLight() {
 @Composable
 private fun NotificationPermissionPreviewDark() {
     OblivioTheme {
-        NotificationPermissionScreen(onEnableClick = {}, onMaybeLaterClick = {})
+        NotificationPermissionScreen(
+            onEnableClick = {},
+            showSettingsDialog = true,
+            onSettingsDialogDismiss = {},
+            onOpenSettingsClick = {},
+        )
     }
 }

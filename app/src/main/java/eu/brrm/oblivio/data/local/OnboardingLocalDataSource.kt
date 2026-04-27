@@ -24,8 +24,22 @@ class OnboardingLocalDataSource @Inject constructor(
         }
     }
 
+    suspend fun hasNotificationPermissionRequestAttempted(): Boolean {
+        return dataStore.data
+            .map { it[notificationPermissionRequestAttemptedKey] ?: false }
+            .first()
+    }
+
+    suspend fun setNotificationPermissionRequestAttempted() {
+        dataStore.edit { prefs ->
+            prefs[notificationPermissionRequestAttemptedKey] = true
+        }
+    }
+
     private companion object {
         val notificationPromptHandledKey = booleanPreferencesKey("notification_prompt_handled")
         val notificationPermissionEnabledKey = booleanPreferencesKey("notification_permission_enabled")
+        val notificationPermissionRequestAttemptedKey =
+            booleanPreferencesKey("notification_permission_request_attempted")
     }
 }

@@ -20,9 +20,12 @@
     <string name="register_toggle_confirm_password_content_desc">Toggle confirm password visibility</string>
 
     <string name="notifications_title">Push notifications</string>
-    <string name="notifications_body">Enable push notifications to get real-time updates on messages, emails, and calls.</string>
+    <string name="notifications_body">Push notifications are required for Oblivio to display message, email, and call alerts. Grant notification permission to continue.</string>
     <string name="notifications_enable_action">Enable</string>
-    <string name="notifications_maybe_later_action">Maybe later</string>
+    <string name="notifications_settings_dialog_title">Allow notifications in settings</string>
+    <string name="notifications_settings_dialog_message">Notification permission is required for Oblivio functionality. Android cannot show the permission dialog again, so open app settings and allow notifications to continue. If you do not grant permission, the app will close.</string>
+    <string name="notifications_settings_dialog_confirm">Open settings</string>
+    <string name="notifications_settings_dialog_cancel">Close app</string>
     <string name="notifications_channel_general_id" translatable="false">oblivio_general_notifications</string>
     <string name="notifications_channel_general_name">General notifications</string>
     <string name="notifications_channel_general_description">Messages, emails, calls, and account updates.</string>

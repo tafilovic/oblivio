@@ -36,6 +36,14 @@ class NotificationRepositoryImpl @Inject constructor(
         return onboardingLocalDataSource.isNotificationPromptHandled()
     }
 
+    override suspend fun markPermissionRequestAttempted() {
+        onboardingLocalDataSource.setNotificationPermissionRequestAttempted()
+    }
+
+    override suspend fun wasPermissionRequestAttempted(): Boolean {
+        return onboardingLocalDataSource.hasNotificationPermissionRequestAttempted()
+    }
+
     override suspend fun subscribeCurrentDevice(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val token = firebaseMessaging.awaitToken()
@@ -68,19 +76,20 @@ class NotificationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun resolvePostLoginDestination(): PostLoginDestination {
-        if (onboardingLocalDataSource.isNotificationPromptHandled()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            onboardingLocalDataSource.setNotificationPromptHandled(isEnabled = true)
             return PostLoginDestination.HOME
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (granted) {
-                onboardingLocalDataSource.setNotificationPromptHandled(isEnabled = true)
-                return PostLoginDestination.HOME
-            }
+
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            onboardingLocalDataSource.setNotificationPromptHandled(isEnabled = true)
+            return PostLoginDestination.HOME
         }
+
         return PostLoginDestination.NOTIFICATION_PERMISSION
     }
 

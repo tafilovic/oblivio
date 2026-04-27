@@ -22,11 +22,24 @@ class NotificationPermissionViewModel @Inject constructor(
     private val _effect = Channel<NotificationPermissionEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                hasRequestedSystemPermission =
+                    notificationRepository.wasPermissionRequestAttempted(),
+            )
+        }
+    }
+
     fun onIntent(intent: NotificationPermissionIntent) {
         when (intent) {
             NotificationPermissionIntent.EnableClicked -> requestPermission()
-            is NotificationPermissionIntent.PermissionResult -> saveResult(intent.isGranted)
-            NotificationPermissionIntent.MaybeLaterClicked -> saveResult(false)
+            NotificationPermissionIntent.SystemPermissionRequestStarted ->
+                markPermissionRequestAttempted()
+            NotificationPermissionIntent.SystemPermissionUnavailable -> showSettingsDialog()
+            is NotificationPermissionIntent.PermissionResult -> handlePermissionResult(intent.isGranted)
+            NotificationPermissionIntent.SettingsDialogDismissed -> closeApp()
+            NotificationPermissionIntent.OpenSettingsClicked -> openSettings()
         }
     }
 
@@ -36,12 +49,48 @@ class NotificationPermissionViewModel @Inject constructor(
         }
     }
 
-    private fun saveResult(enabled: Boolean) {
+    private fun markPermissionRequestAttempted() {
+        viewModelScope.launch {
+            notificationRepository.markPermissionRequestAttempted()
+            _state.value = _state.value.copy(hasRequestedSystemPermission = true)
+        }
+    }
+
+    private fun showSettingsDialog() {
+        _state.value = _state.value.copy(showSettingsDialog = true)
+    }
+
+    private fun openSettings() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                showSettingsDialog = false,
+                hasOpenedSettings = true,
+            )
+            _effect.send(NotificationPermissionEffect.OpenNotificationSettings)
+        }
+    }
+
+    private fun handlePermissionResult(isGranted: Boolean) {
+        if (isGranted) {
+            saveGrant()
+        } else {
+            closeApp()
+        }
+    }
+
+    private fun saveGrant() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSaving = true)
-            notificationRepository.markPromptHandled(enabled)
+            notificationRepository.markPromptHandled(enabled = true)
             _state.value = _state.value.copy(isSaving = false)
             _effect.send(NotificationPermissionEffect.NavigateNext)
+        }
+    }
+
+    private fun closeApp() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(showSettingsDialog = false)
+            _effect.send(NotificationPermissionEffect.CloseApp)
         }
     }
 
