@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import eu.brrm.oblivio.data.repository.AuthRepositoryImpl
+import eu.brrm.oblivio.data.local.AuthSessionStore
+import eu.brrm.oblivio.data.local.AuthTokenDataSource
 import eu.brrm.oblivio.data.repository.HomeRepositoryImpl
 import eu.brrm.oblivio.data.repository.NotificationRepositoryImpl
 import eu.brrm.oblivio.data.repository.ProfileRepositoryImpl
@@ -48,6 +50,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository
+
+    @Binds
+    abstract fun bindAuthSessionStore(impl: AuthTokenDataSource): AuthSessionStore
 }
 
 @Module

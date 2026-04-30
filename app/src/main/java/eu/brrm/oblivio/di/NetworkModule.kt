@@ -11,6 +11,7 @@ import eu.brrm.oblivio.BuildConfig
 import eu.brrm.oblivio.data.remote.AuthApiService
 import eu.brrm.oblivio.data.remote.AuthRequestInterceptor
 import eu.brrm.oblivio.data.remote.NotificationApiService
+import eu.brrm.oblivio.data.remote.RefreshTokenInterceptor
 import javax.inject.Singleton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -32,10 +33,12 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         authRequestInterceptor: AuthRequestInterceptor,
+        refreshTokenInterceptor: RefreshTokenInterceptor,
         loggingInterceptor: HttpLoggingInterceptor,
     ): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(authRequestInterceptor)
+            .addInterceptor(refreshTokenInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
 

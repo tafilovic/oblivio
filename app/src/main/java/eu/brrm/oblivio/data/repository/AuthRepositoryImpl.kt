@@ -3,7 +3,7 @@ package eu.brrm.oblivio.data.repository
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import eu.brrm.oblivio.data.local.AuthTokenDataSource
+import eu.brrm.oblivio.data.local.AuthSessionStore
 import eu.brrm.oblivio.data.remote.ApiErrorMessageParser
 import eu.brrm.oblivio.data.remote.AuthApiService
 import eu.brrm.oblivio.data.remote.AuthSessionMemory
@@ -25,7 +25,7 @@ import retrofit2.HttpException
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val authApiService: AuthApiService,
-    private val authTokenDataSource: AuthTokenDataSource,
+    private val authSessionStore: AuthSessionStore,
     private val authSessionMemory: AuthSessionMemory,
     private val moshi: Moshi,
 ) : AuthRepository {
@@ -55,7 +55,6 @@ class AuthRepositoryImpl @Inject constructor(
                     return@withContext applySessionFromLoginBody(
                         bodyString,
                         response.headers(),
-                        usernameOrEmail.trim(),
                     )
                 } else {
                     httpFailure(
@@ -92,7 +91,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val bodyString = response.body()?.string().orEmpty()
                 if (response.isSuccessful) {
                     return@withContext if (canBuildSessionFromLoginMaterial(bodyString, response.headers())) {
-                        applySessionFromLoginBody(bodyString, response.headers(), trimmed)
+                        applySessionFromLoginBody(bodyString, response.headers())
                     } else {
                         signIn(trimmed, password)
                     }
@@ -119,7 +118,6 @@ class AuthRepositoryImpl @Inject constructor(
     private suspend fun applySessionFromLoginBody(
         bodyString: String,
         headers: Headers,
-        savedIdentifier: String,
     ): Result<Unit> {
         val parsed = runCatching { loginResponseAdapter.fromJson(bodyString) }.getOrNull()
         val access = parsed?.accessTokenValue()
@@ -128,26 +126,26 @@ class AuthRepositoryImpl @Inject constructor(
         if (access.isNullOrBlank() && cookies.isNullOrBlank()) {
             return Result.failure(IllegalStateException("no_session_in_login_response"))
         }
-        authTokenDataSource.saveSession(
+        authSessionStore.saveSession(
             accessToken = access,
-            refreshToken = refresh,
+            refreshToken = refresh
+                ?: extractCookieValue(cookies, REFRESH_COOKIE_NAME),
             sessionCookieHeader = cookies,
-            identifier = savedIdentifier,
         )
         authSessionMemory.setSession(bearer = access, cookie = cookies)
         return Result.success(Unit)
     }
 
     override suspend fun restoreSessionInMemory() = withContext(Dispatchers.IO) {
-        val access = authTokenDataSource.getAccessToken()
-        val cookie = authTokenDataSource.getSessionCookieHeader()
+        val access = authSessionStore.getAccessToken()
+        val cookie = authSessionStore.getSessionCookieHeader()
         authSessionMemory.setSession(bearer = access, cookie = cookie)
     }
 
     override suspend fun hasPersistedCredentials(): Boolean = withContext(Dispatchers.IO) {
-        !authTokenDataSource.getAccessToken().isNullOrBlank() ||
-            !authTokenDataSource.getRefreshToken().isNullOrBlank() ||
-            !authTokenDataSource.getSessionCookieHeader().isNullOrBlank()
+        !authSessionStore.getAccessToken().isNullOrBlank() ||
+            !authSessionStore.getRefreshToken().isNullOrBlank() ||
+            !authSessionStore.getSessionCookieHeader().isNullOrBlank()
     }
 
     override suspend fun fetchSelfProfile(): Result<UserProfile> = withContext(Dispatchers.IO) {
@@ -183,7 +181,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     private suspend fun clearAllSession() {
-        authTokenDataSource.clear()
+        authSessionStore.clear()
         authSessionMemory.clear()
     }
 
@@ -195,6 +193,14 @@ class AuthRepositoryImpl @Inject constructor(
             .filter { it.isNotEmpty() }
             .joinToString("; ")
     }
+
+    private fun extractCookieValue(cookieHeader: String?, name: String): String? =
+        cookieHeader
+            ?.split(';')
+            ?.map { it.trim() }
+            ?.firstOrNull { it.startsWith("$name=") }
+            ?.substringAfter('=')
+            ?.takeIf { it.isNotBlank() }
 
     private fun httpFailure(
         errorBody: String?,
@@ -211,5 +217,6 @@ class AuthRepositoryImpl @Inject constructor(
 
     private companion object {
         private val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
+        private const val REFRESH_COOKIE_NAME = "csrf_refresh"
     }
 }

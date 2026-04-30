@@ -1,7 +1,9 @@
 package eu.brrm.oblivio.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,12 +13,25 @@ import eu.brrm.oblivio.ui.notifications.NotificationPermissionRoute
 import eu.brrm.oblivio.ui.register.RegisterRoute
 import eu.brrm.oblivio.ui.signin.SignInRoute
 import eu.brrm.oblivio.ui.splash.SplashRoute
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun OblivioNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
+    authNavigationViewModel: AuthNavigationViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(navController, authNavigationViewModel) {
+        authNavigationViewModel.logoutEvents.collectLatest {
+            navController.navigate(OblivioDestination.SignIn.route) {
+                navController.currentDestination?.route?.let { route ->
+                    popUpTo(route) { inclusive = true }
+                }
+                launchSingleTop = true
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = OblivioDestination.Splash.route,

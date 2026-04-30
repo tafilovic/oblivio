@@ -1,6 +1,5 @@
 package eu.brrm.oblivio.data.repository
 
-import eu.brrm.oblivio.data.local.AuthTokenDataSource
 import eu.brrm.oblivio.domain.model.ProfileSummary
 import eu.brrm.oblivio.domain.repository.AuthRepository
 import eu.brrm.oblivio.domain.repository.ProfileRepository
@@ -12,14 +11,13 @@ import kotlinx.coroutines.withContext
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
-    private val authTokenDataSource: AuthTokenDataSource,
 ) : ProfileRepository {
     override suspend fun loadProfile(): ProfileSummary = withContext(Dispatchers.IO) {
         authRepository.fetchSelfProfile()
             .map { ProfileSummary(displayName = it.displayName) }
             .getOrElse {
                 ProfileSummary(
-                    displayName = authTokenDataSource.getLastIdentifier() ?: "User",
+                    displayName = "User",
                 )
             }
     }
