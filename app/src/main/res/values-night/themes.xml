@@ -4,9 +4,10 @@
     <style name="Theme.Oblivio" parent="android:Theme.Material.NoActionBar" >
         <item name="android:windowLightStatusBar">false</item>
     </style>
-    <!-- Night: same splash structure, dark background so cold start does not flash white. -->
+    <!-- Keep launch window light so cold start does not flash dark before app theme is loaded. -->
     <style name="Theme.Oblivio.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="android:windowBackground">@color/splash_window_background</item>
+        <item name="windowSplashScreenBackground">@color/splash_window_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.Oblivio</item>
     </style>

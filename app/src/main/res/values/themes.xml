@@ -7,7 +7,8 @@
 
     <!-- System splash before Compose (light / not night): avoids white flash by matching light background. -->
     <style name="Theme.Oblivio.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="android:windowBackground">@color/splash_window_background</item>
+        <item name="windowSplashScreenBackground">@color/splash_window_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.Oblivio</item>
     </style>

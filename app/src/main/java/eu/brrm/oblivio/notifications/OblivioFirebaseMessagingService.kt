@@ -10,13 +10,18 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import eu.brrm.oblivio.BuildConfig
 import eu.brrm.oblivio.MainActivity
 import eu.brrm.oblivio.R
+
+private const val TYPE_NEW_MESSAGE = "new_message"
 
 class OblivioFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -25,10 +30,13 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
 
         logReceivedMessage(message)
 
-        val title = message.notification?.title
+        val pushPayload = OblivioPushPayload.from(message.data)
+        val title = pushPayload?.notificationTitleResId?.let(::getString)
+            ?: message.notification?.title
             ?: message.data["title"]
             ?: getString(R.string.notifications_fallback_title)
-        val body = message.notification?.body
+        val body = pushPayload?.notificationBodyResId?.let(::getString)
+            ?: message.notification?.body
             ?: message.data["body"]
             ?: message.data["message"]
             ?: return
@@ -36,14 +44,28 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
         if (!hasNotificationPermission()) return
 
         ensureGeneralNotificationChannel()
-        showNotification(message = message, title = title, body = body)
+        showNotification(
+            message = message,
+            title = title,
+            body = body,
+            clickUri = pushPayload?.clickUri() ?: message.webUrl(),
+            notificationKey = pushPayload?.notificationKey ?: message.messageId,
+        )
     }
 
     @SuppressLint("MissingPermission")
-    private fun showNotification(message: RemoteMessage, title: String, body: String) {
+    private fun showNotification(
+        message: RemoteMessage,
+        title: String,
+        body: String,
+        clickUri: Uri?,
+        notificationKey: String?,
+    ) {
         NotificationManagerCompat.from(this).notify(
-            message.messageId?.hashCode() ?: System.currentTimeMillis().toInt(),
-            buildNotification(message = message, title = title, body = body),
+            notificationKey?.hashCode()
+                ?: message.messageId?.hashCode()
+                ?: System.currentTimeMillis().toInt(),
+            buildNotification(title = title, body = body, clickUri = clickUri),
         )
     }
 
@@ -52,27 +74,25 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
         // Subscription is intentionally refreshed after login; backend handles deduplication.
     }
 
-    private fun buildNotification(message: RemoteMessage, title: String, body: String) =
+    private fun buildNotification(title: String, body: String, clickUri: Uri?) =
         NotificationCompat.Builder(this, generalChannelId())
             .setSmallIcon(R.drawable.ic_notification_small)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setContentIntent(notificationClickPendingIntent(message))
+            .setContentIntent(notificationClickPendingIntent(clickUri))
             .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-    private fun notificationClickPendingIntent(message: RemoteMessage): PendingIntent {
-        val webUrl = message.webUrl()
-        if (webUrl != null) {
-            val intent = Intent(Intent.ACTION_VIEW, webUrl).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
+    private fun notificationClickPendingIntent(clickUri: Uri?): PendingIntent {
+        val customTabsIntent = clickUri?.let(::customTabsIntent)
+        if (customTabsIntent != null) {
             return PendingIntent.getActivity(
                 this,
-                webUrl.toString().hashCode(),
-                intent,
+                clickUri.toString().hashCode(),
+                customTabsIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
@@ -86,6 +106,20 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+    }
+
+    private fun customTabsIntent(uri: Uri): Intent? {
+        val packageName = CustomTabsClient.getPackageName(this, null) ?: return null
+        val intent = CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .build()
+            .intent
+            .apply {
+                data = uri
+                setPackage(packageName)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        return intent.takeIf { it.resolveActivity(packageManager) != null }
     }
 
     private fun RemoteMessage.webUrl(): Uri? {
@@ -128,17 +162,6 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
                 appendLine("priority=${message.priority}")
                 appendLine("originalPriority=${message.originalPriority}")
                 appendLine("data=${message.data}")
-                appendLine("notification.title=${notification?.title}")
-                appendLine("notification.body=${notification?.body}")
-                appendLine("notification.channelId=${notification?.channelId}")
-                appendLine("notification.clickAction=${notification?.clickAction}")
-                appendLine("notification.color=${notification?.color}")
-                appendLine("notification.icon=${notification?.icon}")
-                appendLine("notification.imageUrl=${notification?.imageUrl}")
-                appendLine("notification.link=${notification?.link}")
-                appendLine("notification.sound=${notification?.sound}")
-                appendLine("notification.tag=${notification?.tag}")
-                appendLine("notification.ticker=${notification?.ticker}")
             },
         )
     }
@@ -152,6 +175,58 @@ class OblivioFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun generalChannelId(): String = getString(R.string.notifications_channel_general_id)
+
+    private sealed interface OblivioPushPayload {
+        val notificationKey: String
+
+        val notificationTitleResId: Int
+
+        val notificationBodyResId: Int
+
+        fun clickUri(): Uri?
+
+        data class NewMessage(
+            val fromUserId: String?,
+            val toUserId: String,
+            val conversationId: String?,
+        ) : OblivioPushPayload {
+            override val notificationTitleResId: Int = R.string.app_name
+
+            override val notificationBodyResId: Int = R.string.notifications_new_message
+
+            override val notificationKey: String =
+                conversationId?.let { "$TYPE_NEW_MESSAGE:$it" }
+                    ?: listOf(
+                        TYPE_NEW_MESSAGE,
+                        fromUserId.orEmpty(),
+                        toUserId,
+                    ).joinToString(separator = ":")
+
+            override fun clickUri(): Uri? {
+                val baseUri = BuildConfig.WEB_BASE_URL.takeIf { it.isNotBlank() }?.let(Uri::parse)
+                return baseUri?.buildUpon()
+                    ?.appendPath(toUserId)
+                    ?.build()
+            }
+        }
+
+        companion object {
+            fun from(data: Map<String, String>): OblivioPushPayload? {
+                return when (data["type"]) {
+                    TYPE_NEW_MESSAGE -> {
+                        val toUserId = data["toUserId"]?.takeIf { it.isNotBlank() } ?: return null
+                        NewMessage(
+                            fromUserId = data["fromUserId"]?.takeIf { it.isNotBlank() },
+                            toUserId = toUserId,
+                            conversationId = data["conversationId"]?.takeIf { it.isNotBlank() }
+                                ?: data["chatId"]?.takeIf { it.isNotBlank() },
+                        )
+                    }
+                    else -> null
+                }
+            }
+        }
+    }
 
     private companion object {
         const val TAG = "OblivioFcmService"

@@ -30,6 +30,7 @@
     <string name="notifications_channel_general_name">General notifications</string>
     <string name="notifications_channel_general_description">Messages, emails, calls, and account updates.</string>
     <string name="notifications_fallback_title">New notification</string>
+    <string name="notifications_new_message">New message</string>
 
     <string name="error_signin_failed">Please enter valid credentials.</string>
     <string name="error_register_failed">Registration could not be completed. Please try again.</string>

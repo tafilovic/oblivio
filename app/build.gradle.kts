@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+fun String.toBuildConfigString(): String = "\"${replace("\"", "\\\"")}\""
+
 android {
     namespace = "eu.brrm.oblivio"
     compileSdk {
@@ -22,7 +24,36 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"https://devapi.oblivio.brrm.eu/\"")
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                providers.gradleProperty("DEV_API_BASE_URL").get().toBuildConfigString(),
+            )
+            buildConfigField(
+                "String",
+                "WEB_BASE_URL",
+                providers.gradleProperty("DEV_WEB_BASE_URL").get().toBuildConfigString(),
+            )
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                providers.gradleProperty("PROD_API_BASE_URL").get().toBuildConfigString(),
+            )
+            buildConfigField(
+                "String",
+                "WEB_BASE_URL",
+                providers.gradleProperty("PROD_WEB_BASE_URL").get().toBuildConfigString(),
+            )
+        }
     }
 
     buildTypes {
@@ -40,8 +71,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         buildConfig = true
@@ -52,6 +83,7 @@ android {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.browser)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
